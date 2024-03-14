@@ -1,0 +1,24 @@
+################################################################################
+# SPDX-License-Identifier: LGPL-3.0-only
+#
+# This file is part of DMod.
+# Copyright (C) 2024 Grégor Boirie <gregor.boirie@free.fr>
+################################################################################
+
+config DMOD_ASSERT_API
+	bool "API assertion"
+	default n
+	help
+	  Build DMod with high-level API assertions enabled to ensure that API
+	  functions exposed by DMod will perform full verification of
+	  arguments consistency.
+
+config DMOD_ASSERT_INTERN
+	bool "Internal assertion"
+	select DMOD_ASSERT_API
+	default n
+	help
+	  Build DMod library with internal assertions enabled to check for
+	  internal DMod behavioral consistency.
+
+# ex: ft=kconfig:
