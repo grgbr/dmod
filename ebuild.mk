@@ -12,8 +12,12 @@ HEADERDIR := $(CURDIR)/include
 headers   := $(PACKAGE)/priv/cdefs.h
 headers   += $(PACKAGE)/dmod.h
 headers   += $(PACKAGE)/iter.h
+headers   += $(PACKAGE)/xact.h
 
-libstroll_pkgconf := $(call kconf_enabled,DMOD_ASSERT_API,libstroll)
+subdirs   += src
+
+libstroll_pkgconf  := $(call kconf_enabled,DMOD_ASSERT_API,libstroll)
+libkvstore_pkgconf := $(call kconf_enabled,DMOD_KVSTORE,libkvstore)
 
 define libdmod_pkgconf_tmpl
 prefix=$(PREFIX)
@@ -24,8 +28,10 @@ includedir=$${prefix}/include
 Name: libdmod
 Description: dmod library
 Version: $(VERSION)
-Requires.private: $(libstroll_pkgconf)
+Requires: $(libstroll_pkgconf)
+Requires.private: $(libkvstore_pkgconf)
 Cflags: -I$${includedir}
+Libs: -L$${libdir} -ldmod
 endef
 
 pkgconfigs      := libdmod.pc
@@ -35,4 +41,6 @@ libdmod.pc-tmpl := libdmod_pkgconf_tmpl
 # Source code tags generation
 ################################################################################
 
-tagfiles := $(shell find $(HEADERDIR) -type f)
+tagfiles := $(shell find $(addprefix $(CURDIR)/,$(subdirs)) \
+                    $(HEADERDIR) \
+                    -type f)

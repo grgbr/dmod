@@ -72,11 +72,11 @@ dmod_iter_error(const struct dmod_iter * __restrict iter)
 }
 
 static inline const char *
-dmod_iter_strerror(const struct dmod_iter * __restrict iter)
+dmod_iter_strerror(const struct dmod_iter * __restrict iter, int error)
 {
 	dmod_iter_assert_api(iter);
 
-	return iter->ops->errstr(iter->err);
+	return iter->ops->errstr(error);
 }
 
 static inline struct dmod_object *
@@ -165,11 +165,12 @@ dmod_const_iter_error(const struct dmod_const_iter * __restrict iter)
 }
 
 static inline const char *
-dmod_const_iter_strerror(const struct dmod_const_iter * __restrict iter)
+dmod_const_iter_strerror(const struct dmod_const_iter * __restrict iter,
+                         int                                       error)
 {
 	dmod_iter_assert_api(iter);
 
-	return iter->ops->errstr(iter->err);
+	return iter->ops->errstr(error);
 }
 
 static inline const struct dmod_object *

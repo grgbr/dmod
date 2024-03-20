@@ -21,4 +21,17 @@ config DMOD_ASSERT_INTERN
 	  Build DMod library with internal assertions enabled to check for
 	  internal DMod behavioral consistency.
 
+config DMOD_KVSTORE
+	bool "KVStore support"
+	default y
+	help
+	  Build DMod library with KVStore support for transactions and
+	  iterators.
+
+config DMOD_XACT_NULL
+	bool "Dummy null transaction"
+	default n
+	help
+	  Build DMod library with support for dummy / null transactions.
+
 # ex: ft=kconfig:
