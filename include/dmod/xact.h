@@ -136,18 +136,18 @@ dmod_xact_free(struct dmod_xact * xact)
 
 extern struct dmod_xact *
 dmod_xact_create_null(void)
-	__dmod_nothrow __leaf;
+	__dmod_nothrow __leaf __dmod_export;
 
 #endif /* defined(CONFIG_DMOD_XACT_NULL) */
 
 #if defined(CONFIG_DMOD_KVSTORE)
 
 struct dmod_xact_kvs;
-struct kvs_depot;
+struct kvs_repo;
 
 extern struct dmod_xact_kvs *
-dmod_xact_create_kvs(const struct kvs_depot * __restrict depot)
-	__dmod_nonull(1) __dmod_nothrow __leaf;
+dmod_xact_create_kvs(const struct kvs_repo * __restrict repo)
+	__dmod_nonull(1) __dmod_nothrow __leaf __dmod_export;
 
 #endif /* defined(CONFIG_DMOD_KVSTORE) */
 

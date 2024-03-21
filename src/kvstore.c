@@ -11,17 +11,17 @@
  * Transaction processing
  ******************************************************************************/
 
-#include <kvstore/store.h>
+#include <kvstore/repo.h>
 
 struct dmod_xact_kvs {
 	struct dmod_xact         base;
 	struct kvs_xact          kvs;
-	const struct kvs_depot * depot;
+	const struct kvs_repo *  repo;
 };
 
 #define dmod_xact_assert_kvs(_xact) \
 	dmod_xact_assert_intern(_xact); \
-	dmod_assert_intern(((struct dmod_xact_kvs *)_xact)->depot)
+	dmod_assert_intern(((struct dmod_xact_kvs *)_xact)->repo)
 
 static int __dmod_nonull(1)
 dmod_xact_begin_kvs(struct dmod_xact * xact, struct dmod_xact * parent)
@@ -34,11 +34,11 @@ dmod_xact_begin_kvs(struct dmod_xact * xact, struct dmod_xact * parent)
 
 	struct dmod_xact_kvs * kxact = (struct dmod_xact_kvs *)xact;
 
-	return kvs_begin_xact(kxact->depot,
-	                      !parent ? NULL :
-	                                &((struct dmod_xact_kvs *)parent)->kvs,
-	                      &kxact->kvs,
-	                      0);
+	return kvs_repo_begin_xact(
+		kxact->repo,
+		!parent ? NULL : &((struct dmod_xact_kvs *)parent)->kvs,
+		&kxact->kvs,
+		0);
 }
 
 static int __dmod_nonull(1)
@@ -89,9 +89,9 @@ static const struct dmod_xact_ops dmod_xact_kvs_ops = {
 };
 
 struct dmod_xact_kvs *
-dmod_xact_create_kvs(const struct kvs_depot * __restrict depot)
+dmod_xact_create_kvs(const struct kvs_repo * __restrict repo)
 {
-	dmod_assert_api(depot);
+	dmod_assert_api(repo);
 
 	struct dmod_xact_kvs * kxact;
 
@@ -100,7 +100,7 @@ dmod_xact_create_kvs(const struct kvs_depot * __restrict depot)
 		return NULL;
 
 	dmod_xact_init(&kxact->base, &dmod_xact_kvs_ops);
-	kxact->depot = depot;
+	kxact->repo = repo;
 
 	return kxact;
 }
