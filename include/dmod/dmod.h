@@ -124,22 +124,30 @@ dmod_object_fini(struct dmod_object * __restrict obj __unused)
  ******************************************************************************/
 
 struct dmod_mapper;
+struct dmod_xact;
 
-typedef int (dmod_mapper_save_fn)(struct dmod_mapper *,
-                                  struct dmod_object *,
-                                  void *);
+typedef int
+        (dmod_mapper_save_fn)(struct dmod_mapper *,
+                              struct dmod_object *,
+                              struct dmod_xact *);
+
+typedef const char *
+        (dmod_mapper_errstr_fn)(int);
 
 struct dmod_mapper_ops {
-	dmod_mapper_save_fn * save;
+	dmod_mapper_save_fn *   save;
+	dmod_mapper_errstr_fn * errstr;
 };
 
 #define dmod_mapper_ops_assert_api(_ops) \
 	dmod_assert_api(_ops); \
-	dmod_assert_api((_ops)->save)
+	dmod_assert_api((_ops)->save); \
+	dmod_assert_api((_ops)->errstr)
 
 #define dmod_mapper_ops_assert_intern(_ops) \
 	dmod_assert_intern(_ops); \
-	dmod_assert_intern((_ops)->save)
+	dmod_assert_intern((_ops)->save); \
+	dmod_assert_intern((_ops)->errstr)
 
 struct dmod_mapper {
 	const struct dmod_mapper_ops * ops;
@@ -153,10 +161,18 @@ struct dmod_mapper {
 	dmod_assert_intern(_mapper); \
 	dmod_mapper_ops_assert_intern((_mapper)->ops)
 
+static inline const char *
+dmod_mapper_strerror(const struct dmod_mapper * map, int error)
+{
+	dmod_mapper_assert_api(map);
+
+	return map->ops->errstr(error);
+}
+
 static inline int
 dmod_mapper_rdonly_save(struct dmod_mapper * __restrict mapper __unused,
                         struct dmod_object * __restrict object __unused,
-                        void * __restrict               data __unused)
+                        struct dmod_xact * __restrict   xact __unused)
 {
 	dmod_mapper_assert_api(mapper);
 	dmod_assert_api(object);

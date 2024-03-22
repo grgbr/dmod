@@ -27,23 +27,15 @@ typedef int
         (dmod_xact_begin_fn)(struct dmod_xact *, struct dmod_xact *);
 
 typedef int
-        (dmod_xact_end_fn)(struct dmod_xact *, int);
-
-typedef int
-        (dmod_xact_assess_fn)(struct dmod_xact *);
-
-typedef const char *
-        (dmod_xact_errstr_fn)(int);
+        (dmod_xact_assess_fn)(struct dmod_xact *, int);
 
 typedef void
         (dmod_xact_destroy_fn)(struct dmod_xact *);
 
 struct dmod_xact_ops {
 	dmod_xact_begin_fn *    begin;
-	dmod_xact_end_fn *      end;
-	dmod_xact_assess_fn *   commit;
-	dmod_xact_assess_fn *   rollback;
-	dmod_xact_errstr_fn *   errstr;
+	dmod_xact_assess_fn *   end;
+	dmod_xact_assess_fn *   abort;
 	dmod_xact_destroy_fn *  destroy;
 };
 
@@ -51,9 +43,7 @@ struct dmod_xact_ops {
 	dmod_assert_api(_ops); \
 	dmod_assert_api((_ops)->begin); \
 	dmod_assert_api((_ops)->end); \
-	dmod_assert_api((_ops)->commit); \
-	dmod_assert_api((_ops)->rollback); \
-	dmod_assert_api((_ops)->errstr); \
+	dmod_assert_api((_ops)->abort); \
 	dmod_assert_api((_ops)->destroy)
 
 struct dmod_xact {
@@ -75,7 +65,7 @@ dmod_xact_begin(struct dmod_xact * xact, struct dmod_xact * parent)
 	return xact->ops->begin(xact, parent);
 }
 
-static inline int __dmod_nonull(1)
+static inline int __dmod_nonull(1) __warn_result
 dmod_xact_end(struct dmod_xact * xact, int status)
 {
 	dmod_xact_assert_api(xact);
@@ -83,28 +73,12 @@ dmod_xact_end(struct dmod_xact * xact, int status)
 	return xact->ops->end(xact, status);
 }
 
-static inline int __dmod_nonull(1)
-dmod_xact_commit(struct dmod_xact * xact)
+static inline int __dmod_nonull(1) __warn_result
+dmod_xact_abort(struct dmod_xact * xact, int status)
 {
 	dmod_xact_assert_api(xact);
 
-	return xact->ops->commit(xact);
-}
-
-static inline int __dmod_nonull(1)
-dmod_xact_rollback(struct dmod_xact * xact)
-{
-	dmod_xact_assert_api(xact);
-
-	return xact->ops->rollback(xact);
-}
-
-static inline const char *
-dmod_xact_strerror(const struct dmod_xact * __restrict xact, int error)
-{
-	dmod_xact_assert_api(xact);
-
-	return xact->ops->errstr(error);
+	return xact->ops->abort(xact, status);
 }
 
 static inline void __dmod_nonull(1)
@@ -142,8 +116,11 @@ dmod_xact_create_null(void)
 
 #if defined(CONFIG_DMOD_KVSTORE)
 
-struct dmod_xact_kvs;
 struct kvs_repo;
+
+extern struct kvs_xact *
+dmod_xact_get_kvs(struct dmod_xact * xact)
+	__dmod_nonull(1) __dmod_pure __dmod_nothrow __leaf __dmod_export;
 
 extern struct dmod_xact_kvs *
 dmod_xact_create_kvs(const struct kvs_repo * __restrict repo)

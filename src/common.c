@@ -25,28 +25,12 @@ dmod_xact_begin_null(struct dmod_xact * xact __unused,
 	return 0;
 }
 
-static int __dmod_nonull(1)
-dmod_xact_end_null(struct dmod_xact * xact, int status)
+static int __dmod_nonull(1) __warn_result
+dmod_xact_assess_null(struct dmod_xact * xact __unused, int status)
 {
 	dmod_xact_assert_null(xact);
 
 	return status;
-}
-
-static int __dmod_nonull(1)
-dmod_xact_assess_null(struct dmod_xact * xact __unused)
-{
-	dmod_xact_assert_null(xact);
-
-	return 0;
-}
-
-static const char *
-dmod_xact_null_errstr(int error)
-{
-	dmod_assert_api(!error);
-
-	return "Success";
 }
 
 static struct dmod_xact * __dmod_nothrow __attribute_malloc__ __warn_result
@@ -57,10 +41,8 @@ dmod_xact_alloc_null(void)
 
 static const struct dmod_xact_ops dmod_xact_null_ops = {
 	.begin     = dmod_xact_begin_null,
-	.end       = dmod_xact_end_null,
-	.commit    = dmod_xact_assess_null,
-	.rollback  = dmod_xact_assess_null,
-	.errstr    = dmod_xact_null_errstr,
+	.end       = dmod_xact_assess_null,
+	.abort     = dmod_xact_assess_null,
 	.destroy   = dmod_xact_free
 };
 

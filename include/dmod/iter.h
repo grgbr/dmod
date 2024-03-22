@@ -32,22 +32,17 @@ typedef int
 typedef void
         (dmod_iter_fini_fn)(struct dmod_iter *);
 
-typedef const char *
-        (dmod_iter_errstr_fn)(int);
-
 struct dmod_iter_ops {
 	dmod_iter_step_fn *   step;
 	dmod_iter_rewind_fn * rewind;
 	dmod_iter_fini_fn *   fini;
-	dmod_iter_errstr_fn * errstr;
 };
 
 #define dmod_iter_ops_assert_api(_ops) \
 	dmod_assert_api(_ops); \
 	dmod_assert_api((_ops)->step); \
 	dmod_assert_api((_ops)->rewind); \
-	dmod_assert_api((_ops)->fini); \
-	dmod_assert_api((_ops)->errstr)
+	dmod_assert_api((_ops)->fini)
 
 struct dmod_iter {
 	const struct dmod_iter_ops * ops;
@@ -69,14 +64,6 @@ dmod_iter_error(const struct dmod_iter * __restrict iter)
 	dmod_iter_assert_api(iter);
 
 	return iter->err;
-}
-
-static inline const char *
-dmod_iter_strerror(const struct dmod_iter * __restrict iter, int error)
-{
-	dmod_iter_assert_api(iter);
-
-	return iter->ops->errstr(error);
 }
 
 static inline struct dmod_object *
@@ -142,7 +129,6 @@ struct dmod_const_iter_ops {
 	dmod_const_iter_step_fn *   step;
 	dmod_const_iter_rewind_fn * rewind;
 	dmod_const_iter_fini_fn *   fini;
-	dmod_iter_errstr_fn *       errstr;
 };
 
 struct dmod_const_iter {
@@ -162,15 +148,6 @@ dmod_const_iter_error(const struct dmod_const_iter * __restrict iter)
 	dmod_iter_assert_api(iter);
 
 	return iter->err;
-}
-
-static inline const char *
-dmod_const_iter_strerror(const struct dmod_const_iter * __restrict iter,
-                         int                                       error)
-{
-	dmod_iter_assert_api(iter);
-
-	return iter->ops->errstr(error);
 }
 
 static inline const struct dmod_object *

@@ -23,6 +23,14 @@ struct dmod_xact_kvs {
 	dmod_xact_assert_intern(_xact); \
 	dmod_assert_intern(((struct dmod_xact_kvs *)_xact)->repo)
 
+struct kvs_xact *
+dmod_xact_get_kvs(struct dmod_xact * xact)
+{
+	dmod_xact_assert_kvs(xact);
+
+	return &((struct dmod_xact_kvs *)xact)->kvs;
+}
+
 static int __dmod_nonull(1)
 dmod_xact_begin_kvs(struct dmod_xact * xact, struct dmod_xact * parent)
 {
@@ -41,36 +49,20 @@ dmod_xact_begin_kvs(struct dmod_xact * xact, struct dmod_xact * parent)
 		0);
 }
 
-static int __dmod_nonull(1)
+static int __dmod_nonull(1) __warn_result
 dmod_xact_end_kvs(struct dmod_xact * xact, int status)
 {
 	dmod_xact_assert_kvs(xact);
 
-	return kvs_end_xact(&((struct dmod_xact_kvs *)xact)->kvs, status);
+	return kvs_complete_xact(&((struct dmod_xact_kvs *)xact)->kvs, status);
 }
 
-static int __dmod_nonull(1)
-dmod_xact_commit_kvs(struct dmod_xact * xact)
+static int __dmod_nonull(1) __warn_result
+dmod_xact_abort_kvs(struct dmod_xact * xact, int status)
 {
 	dmod_xact_assert_kvs(xact);
 
-	return kvs_commit_xact(&((struct dmod_xact_kvs *)xact)->kvs);
-}
-
-static int __dmod_nonull(1)
-dmod_xact_rollback_kvs(struct dmod_xact * xact)
-{
-	dmod_xact_assert_kvs(xact);
-
-	return kvs_rollback_xact(&((struct dmod_xact_kvs *)xact)->kvs);
-}
-
-static const char *
-dmod_xact_kvs_errstr(int error)
-{
-	dmod_assert_api(error <= 0);
-
-	return kvs_strerror(error);
+	return kvs_abort_xact(&((struct dmod_xact_kvs *)xact)->kvs, status);
 }
 
 static struct dmod_xact_kvs * __dmod_nothrow __attribute_malloc__ __warn_result
@@ -82,9 +74,7 @@ dmod_xact_alloc_kvs(void)
 static const struct dmod_xact_ops dmod_xact_kvs_ops = {
 	.begin     = dmod_xact_begin_kvs,
 	.end       = dmod_xact_end_kvs,
-	.commit    = dmod_xact_commit_kvs,
-	.rollback  = dmod_xact_rollback_kvs,
-	.errstr    = dmod_xact_kvs_errstr,
+	.abort     = dmod_xact_abort_kvs,
 	.destroy   = dmod_xact_free
 };
 
