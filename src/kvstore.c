@@ -54,7 +54,7 @@ dmod_xact_end_kvs(struct dmod_xact * xact, int status)
 {
 	dmod_xact_assert_kvs(xact);
 
-	return kvs_complete_xact(&((struct dmod_xact_kvs *)xact)->kvs, status);
+	return kvs_end_xact(&((struct dmod_xact_kvs *)xact)->kvs, status);
 }
 
 static int __dmod_nonull(1) __warn_result
